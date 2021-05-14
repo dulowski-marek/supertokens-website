@@ -16,15 +16,18 @@ import { PROCESS_STATE, ProcessState } from "./processState";
 import { supported_fdi } from "./version";
 import Lock from "browser-tabs-lock";
 import {
-    InputType,
-    validateAndNormaliseInputOrThrowError,
-    normaliseURLPathOrThrowError,
-    normaliseURLDomainOrThrowError,
     getWindowOrThrow,
-    normaliseSessionScopeOrThrowError
+    InputType,
+    normaliseSessionScopeOrThrowError,
+    normaliseURLDomainOrThrowError,
+    normaliseURLPathOrThrowError,
+    validateAndNormaliseInputOrThrowError
 } from "./utils";
 import CrossDomainLocalstorage from "./crossDomainLocalstorage";
 import { doesSessionExist } from "./index";
+import { IdRefreshTokenType } from './IdRefreshTokenType';
+import { FrontToken } from './FrontToken';
+import GlobalSessionManager from './GlobalSessionManager';
 
 export class AntiCsrfToken {
     private static tokenInfo:
@@ -73,35 +76,6 @@ export class AntiCsrfToken {
             antiCsrf,
             associatedIdRefreshToken
         };
-    }
-}
-
-// Note: We do not store this in memory because another tab may have
-// modified this value, and if so, we may not know about it in this tab
-export class FrontToken {
-    private constructor() {}
-
-    static async getTokenInfo(): Promise<
-        | {
-              uid: string;
-              ate: number;
-              up: any;
-          }
-        | undefined
-    > {
-        let frontToken = await getFrontToken();
-        if (frontToken === null) {
-            return undefined;
-        }
-        return JSON.parse(atob(frontToken));
-    }
-
-    static async removeToken() {
-        await setFrontToken(undefined);
-    }
-
-    static async setItem(frontToken: string) {
-        await setFrontToken(frontToken);
     }
 }
 
@@ -198,6 +172,8 @@ export default class AuthHttpRequest {
                 return AuthHttpRequest.fetch(url, config);
             };
         }
+
+        FrontToken.subscribe(GlobalSessionManager);
 
         AuthHttpRequest.initCalled = true;
     }
@@ -588,15 +564,6 @@ export async function onUnauthorisedResponse(
         }
     }
 }
-
-type IdRefreshTokenType =
-    | {
-          status: "NOT_EXISTS" | "MAY_EXIST";
-      }
-    | {
-          status: "EXISTS";
-          token: string;
-      };
 
 // if tryRefresh is true & this token doesn't exist, we try and refresh the session
 // else we return undefined.

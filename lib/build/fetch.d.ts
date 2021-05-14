@@ -1,21 +1,12 @@
 import { InputType } from "./utils";
 import CrossDomainLocalstorage from "./crossDomainLocalstorage";
+import { IdRefreshTokenType } from './IdRefreshTokenType';
 export declare class AntiCsrfToken {
     private static tokenInfo;
     private constructor();
     static getToken(associatedIdRefreshToken: string | undefined): Promise<string | undefined>;
     static removeToken(): Promise<void>;
     static setItem(associatedIdRefreshToken: string | undefined, antiCsrf: string): Promise<void>;
-}
-export declare class FrontToken {
-    private constructor();
-    static getTokenInfo(): Promise<{
-        uid: string;
-        ate: number;
-        up: any;
-    } | undefined>;
-    static removeToken(): Promise<void>;
-    static setItem(frontToken: string): Promise<void>;
 }
 /**
  * @description returns true if retry, else false is session has expired completely.
@@ -81,15 +72,8 @@ export declare function onUnauthorisedResponse(refreshTokenUrl: string, preReque
 } | {
     result: "RETRY";
 }>;
-declare type IdRefreshTokenType = {
-    status: "NOT_EXISTS" | "MAY_EXIST";
-} | {
-    status: "EXISTS";
-    token: string;
-};
 export declare function getIdRefreshToken(tryRefresh: boolean): Promise<IdRefreshTokenType>;
 export declare function setIdRefreshToken(idRefreshToken: string): Promise<void>;
 export declare function setAntiCSRF(antiCSRFToken: string | undefined): Promise<void>;
 export declare function getFrontToken(): Promise<string | null>;
 export declare function setFrontToken(frontToken: string | undefined): Promise<void>;
-export {};

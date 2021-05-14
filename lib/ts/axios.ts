@@ -18,11 +18,11 @@ import AuthHttpRequestFetch, {
     AntiCsrfToken,
     handleUnauthorised,
     getIdRefreshToken,
-    setIdRefreshToken,
-    FrontToken
+    setIdRefreshToken
 } from "./fetch";
 import { PROCESS_STATE, ProcessState } from "./processState";
 import { normaliseURLDomainOrThrowError } from "./utils";
+import { FrontToken } from './FrontToken';
 
 function getUrlFromConfig(config: AxiosRequestConfig) {
     let url: string = config.url === undefined ? "" : config.url;
